@@ -2,18 +2,20 @@ import 'package:krafta/models/exercise.dart';
 import 'package:krafta/models/workout.dart';
 import 'package:flutter/foundation.dart';
 
-class WorkoutData extends ChangeNotifier {
-  /*
+/*
+Klasi sem heldur utan um og stýrir lista af æfingaáætlanum (Workout).
 
-    WORKOUT DATA STRUCTURE
-
-    - This overall list contains the different workouts
-    - Each workout has a name and a list of exercises
-
+Sér um að:
+  - halda skrá yfir allar æfingaáætlanir
+  - bæta nýjum áætlunum við
+  - bæta æfingum við tilteknar áætlanir
+  - skrá loknar æfingar
+  - tilkynna áhorfendur um breytingar með notifyListeners()
 */
 
+class WorkoutData extends ChangeNotifier {
   List<Workout> workoutList = [
-    // default workout
+    // sjálfgefna æfingaáætlunin
     Workout(
       name: 'Upper Body',
       exercises: [
@@ -26,19 +28,18 @@ class WorkoutData extends ChangeNotifier {
     ),
   ];
 
-  // get the workout list
+  /// Skilar núverandi lista af æfingaáætlunum
   List<Workout> getWorkoutList() {
     return workoutList;
   }
 
-  // add a new workout
+  /// Bætir við nýrri æfingaáætlun með nafni
   void addWorkout(String name) {
     workoutList.add(Workout(name: name, exercises: []));
     notifyListeners();
   }
 
-  // add an exercise to a workout
-
+  /// Bætir æfingu með [exerciseName], [weight], [reps] og [sets] við áætlunina [workoutName]
   void addExercise(
     String workoutName,
     String exerciseName,
@@ -46,7 +47,7 @@ class WorkoutData extends ChangeNotifier {
     String reps,
     String sets,
   ) {
-    // find the relevant workout
+    // Finna rétta æfingaáætlun
     Workout relevantWorkout = getRelevantWorkout(workoutName);
 
     relevantWorkout.exercises.add(
@@ -55,46 +56,30 @@ class WorkoutData extends ChangeNotifier {
     notifyListeners();
   }
 
-  // check off an exercise
-
+  /// Breytir stöðu æfingar lokið/ólokuð
   void checkOffExercise(String workoutName, String exerciseName) {
-    // find the relevant exercise
+    // Finna þá æfingu sem á að merkja
     Exercise relevantExercise = getRelevantExercise(workoutName, exerciseName);
 
-    // check off the exercise
     relevantExercise.isCompleted = !relevantExercise.isCompleted;
-
     notifyListeners();
   }
 
-  // getting the length of the workout
+  /// Skilar fjölda æfinga í áætluninni
   int numberOfExercisesInWorkout(String workoutName) {
-    // find the relevant workout
     Workout relevantWorkout = getRelevantWorkout(workoutName);
-
-    // return the length of the workout
     return relevantWorkout.exercises.length;
   }
 
-  // return the relevant workout given the workout name
+  /// Finnur og skilar æfingaáætlun með nafni
   Workout getRelevantWorkout(String workoutName) {
-    Workout relevantWorkout = workoutList.firstWhere(
-      (workout) => workout.name == workoutName,
-    );
-
-    return relevantWorkout;
+    return workoutList.firstWhere((workout) => workout.name == workoutName);
   }
 
-  // return the relevant exercise given the workout name and exercise name
   Exercise getRelevantExercise(String workoutName, String exerciseName) {
-    // find the relevant workout
     Workout relevantWorkout = getRelevantWorkout(workoutName);
-
-    // find the relevant exercise
-    Exercise relevantExercise = relevantWorkout.exercises.firstWhere(
+    return relevantWorkout.exercises.firstWhere(
       (exercise) => exercise.name == exerciseName,
     );
-
-    return relevantExercise;
   }
 }

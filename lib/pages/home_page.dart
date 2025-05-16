@@ -3,6 +3,15 @@ import 'package:krafta/data/workout_data.dart';
 import 'package:krafta/pages/workout_page.dart';
 import 'package:provider/provider.dart';
 
+/*
+  Heimaskjárinn sýnir lista af æfingaáætlunum og stýrir viðbót nýrra áætlana.
+
+  Sér um að:
+  - birta allar æfingaáætlunir í lista
+  - sýna glugga til að búa til nýja áætlun
+  - fara á æfinga síðu þegar ýtt er á færslu
+*/
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -10,11 +19,12 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
+// Innri klasi sem heldur utan um ástand Heimaskjásins.
 class _HomePageState extends State<HomePage> {
-  // text controller
+  // Stýringarhlutur fyrir innslátt á nafni nýrrar áætlunar
   final newWorkoutNameController = TextEditingController();
 
-  // create a new workout
+  // Opnar samræðuventi til að búa til nýja æfingaáætlun
   void createNewWorkout() {
     showDialog(
       context: context,
@@ -23,17 +33,16 @@ class _HomePageState extends State<HomePage> {
             title: Text('Create new workout'),
             content: TextField(controller: newWorkoutNameController),
             actions: [
-              // save button
+              // Vista hnappur sendir innslátt áfram
               MaterialButton(onPressed: save, child: Text('Save')),
-
-              // cancel button
+              // Hætta við lokar glugga án vistunar
               MaterialButton(onPressed: cancel, child: Text('Cancel')),
             ],
           ),
     );
   }
 
-  // go to workout page
+  // Fer á síðu tiltekinnar æfingaáætlunar
   void goToWorkoutPage(String workoutName) {
     Navigator.push(
       context,
@@ -43,24 +52,23 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // save the workout
+  // Les nafn nýju áætlunarinnar og bætir henni við gagnagrunn
   void save() {
     String newWorkoutName = newWorkoutNameController.text;
     Provider.of<WorkoutData>(context, listen: false).addWorkout(newWorkoutName);
 
-    // pop dialog box
+    // Loka samræðuventi og hreinsa stjórnara
     Navigator.pop(context);
     clear();
   }
 
-  // cancel the workout
+  // Hættir við að búa til nýja áætlun og hreinsar stjórnara
   void cancel() {
-    // pop dialog box
     Navigator.pop(context);
     clear();
   }
 
-  // clear controllers
+  // Hreinsar textastýringar
   void clear() {
     newWorkoutNameController.clear();
   }
