@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:krafta/data/workout_data.dart';
 import 'package:provider/provider.dart';
-import 'pages/home_page.dart';
+import 'package:krafta/data/workout_data.dart';
+import 'package:krafta/pages/home_page.dart';
+import 'package:krafta/services/hive_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await HiveService.init();
   runApp(const MyApp());
 }
 
@@ -13,10 +16,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => WorkoutData(),
+      create: (_) => WorkoutData(),
       child: MaterialApp(
-        debugShowCheckedModeBanner: false, 
-        home: HomePage(),
+        debugShowCheckedModeBanner: false,
+        home: const HomePage(),
       ),
     );
   }

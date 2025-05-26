@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:krafta/components/exercise_tile.dart';
 import 'package:krafta/data/workout_data.dart';
-import 'package:provider/provider.dart';
 
 class WorkoutPage extends StatefulWidget {
   final String workoutName;
@@ -12,133 +12,169 @@ class WorkoutPage extends StatefulWidget {
 }
 
 class _WorkoutPageState extends State<WorkoutPage> {
-  // Stýrir því hvort æfing sé lokið eða ekki
-  void onCheckBoxChanged(String workoutName, String exerciseName) {
-    // Breytir stöðu æfingarinnar
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController weightController = TextEditingController();
+  final TextEditingController repsController = TextEditingController();
+  final TextEditingController setsController = TextEditingController();
+
+  @override
+  void dispose() {
+    nameController.dispose();
+    weightController.dispose();
+    repsController.dispose();
+    setsController.dispose();
+    super.dispose();
+  }
+
+  void toggleExercise(String exerciseName) {
     Provider.of<WorkoutData>(
       context,
       listen: false,
-    ).checkOffExercise(workoutName, exerciseName);
+    ).checkOffExercise(widget.workoutName, exerciseName);
   }
 
-  // text controllers
-  final exerciseNameController = TextEditingController();
-  final weightController = TextEditingController();
-  final repsController = TextEditingController();
-  final setsController = TextEditingController();
-
-  // Stýrir því að ný æfing sé búin til
-  void createNewExercise() {
+  void openNewExerciseDialog() {
     showDialog(
       context: context,
       builder:
-          (context) => AlertDialog(
-            title: Text('Create new exercise'),
+          (_) => AlertDialog(
+            title: const Text('Add an Exercise'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
-                  controller: exerciseNameController,
-                  decoration: InputDecoration(hintText: 'Exercise Name'),
+                  controller: nameController,
+                  decoration: const InputDecoration(hintText: 'Exercise Name'),
                 ),
                 TextField(
                   controller: weightController,
-                  decoration: InputDecoration(hintText: 'Weight'),
+                  decoration: const InputDecoration(hintText: 'Weight'),
+                  keyboardType: TextInputType.number,
                 ),
                 TextField(
                   controller: repsController,
-                  decoration: InputDecoration(hintText: 'Reps'),
+                  decoration: const InputDecoration(hintText: 'Reps'),
+                  keyboardType: TextInputType.number,
                 ),
                 TextField(
                   controller: setsController,
-                  decoration: InputDecoration(hintText: 'Sets'),
+                  decoration: const InputDecoration(hintText: 'Sets'),
+                  keyboardType: TextInputType.number,
                 ),
               ],
             ),
             actions: [
-              // Vista hnappur sendir innslátt áfram
-              MaterialButton(onPressed: save, child: Text('Save')),
-              // Hætta við lokar glugga án vistunar
-              MaterialButton(onPressed: cancel, child: Text('Cancel')),
+              TextButton(onPressed: cancel, child: const Text('Cancel')),
+              ElevatedButton(
+                onPressed: saveExercise,
+                child: const Text('Save'),
+              ),
             ],
           ),
     );
   }
 
-  void save() {
-    String newExerciceName = exerciseNameController.text;
+  void saveExercise() {
+    final name = nameController.text.trim();
+    if (name.isEmpty) return;
+
     Provider.of<WorkoutData>(context, listen: false).addExercise(
       widget.workoutName,
-      newExerciceName,
-      weightController.text,
-      repsController.text,
-      setsController.text,
+      name,
+      weightController.text.trim(),
+      repsController.text.trim(),
+      setsController.text.trim(),
     );
-
-    Navigator.pop(context);
-    clear();
+    Navigator.of(context).pop();
+    clearFields();
   }
 
-  void cancel() {
-    Navigator.pop(context);
-    clear();
-  }
-
-  void clear() {
-    exerciseNameController.clear();
+  void clearFields() {
+    nameController.clear();
     weightController.clear();
     repsController.clear();
     setsController.clear();
+  }
+
+  void cancel() {
+    Navigator.of(context).pop();
+    clearFields();
+  }
+
+  void showEditExerciseDialog(String oldName) {
+    final controller = TextEditingController(text: oldName);
+    showDialog(
+      context: context,
+      builder:
+          (_) => AlertDialog(
+            title: const Text('Rename Exercise'),
+            content: TextField(controller: controller),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  final newName = controller.text.trim();
+                  if (newName.isNotEmpty) {
+                    Provider.of<WorkoutData>(
+                      context,
+                      listen: false,
+                    ).renameExercise(widget.workoutName, oldName, newName);
+                  }
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Save'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Cancel'),
+              ),
+            ],
+          ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<WorkoutData>(
       builder:
-          (context, value, child) => Scaffold(
+          (context, data, child) => Scaffold(
             appBar: AppBar(title: Text(widget.workoutName)),
             floatingActionButton: FloatingActionButton(
-              onPressed: () => createNewExercise(),
-              child: Icon(Icons.add),
+              onPressed: openNewExerciseDialog,
+              child: const Icon(Icons.add),
             ),
             body: ListView.builder(
-              itemCount: value.numberOfExercisesInWorkout(widget.workoutName),
-              itemBuilder:
-                  (context, index) => ExerciseTile(
-                    exerciseName:
-                        value
-                            .getRelevantWorkout(widget.workoutName)
-                            .exercises[index]
-                            .name,
-                    weight:
-                        value
-                            .getRelevantWorkout(widget.workoutName)
-                            .exercises[index]
-                            .weight,
-                    reps:
-                        value
-                            .getRelevantWorkout(widget.workoutName)
-                            .exercises[index]
-                            .reps,
-                    sets:
-                        value
-                            .getRelevantWorkout(widget.workoutName)
-                            .exercises[index]
-                            .sets,
-                    isCompleted:
-                        value
-                            .getRelevantWorkout(widget.workoutName)
-                            .exercises[index]
-                            .isCompleted,
-                    onCheckBoxChanged:
-                        (val) => onCheckBoxChanged(
-                          widget.workoutName,
-                          value
-                              .getRelevantWorkout(widget.workoutName)
-                              .exercises[index]
-                              .name,
-                        ),
+              padding: const EdgeInsets.all(8),
+              itemCount: data.numberOfExercisesInWorkout(widget.workoutName),
+              itemBuilder: (context, index) {
+                final exercise =
+                    data
+                        .getRelevantWorkout(widget.workoutName)
+                        .exercises[index];
+                return Dismissible(
+                  key: ValueKey('${widget.workoutName}-$index'),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    color: Colors.red,
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: const Icon(Icons.delete, color: Colors.white),
                   ),
+                  onDismissed: (_) {
+                    data.deleteExercise(widget.workoutName, exercise.name);
+                  },
+                  child: GestureDetector(
+                    onLongPress: () => showEditExerciseDialog(exercise.name),
+                    child: ExerciseTile(
+                      exerciseName: exercise.name,
+                      weight: exercise.weight,
+                      reps: exercise.reps,
+                      sets: exercise.sets,
+                      isCompleted: exercise.isCompleted,
+                      onCheckBoxChanged: (_) => toggleExercise(exercise.name),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
     );
