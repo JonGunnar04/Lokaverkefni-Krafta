@@ -21,15 +21,25 @@ class ExerciseTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey[100],
+      margin: EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.grey[400],
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: ListTile(
-        title: Text(exerciseName),
-        subtitle: Row(
-          children: [
-            Chip(label: Text('Weight: $weight kg')),
-            Chip(label: Text('Reps: $reps')),
-            Chip(label: Text('Sets: $sets')),
-          ],
+        contentPadding: EdgeInsets.all(8),
+        title: Text(exerciseName, style: TextStyle(fontSize: 18)),
+        subtitle: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              Chip(label: Text('Weight: $weight kg')),
+              const SizedBox(width: 6),
+              Chip(label: Text('Reps: $reps')),
+              const SizedBox(width: 6),
+              Chip(label: Text('Sets: $sets')),
+            ],
+          ),
         ),
         trailing: Checkbox(
           value: isCompleted,

@@ -137,44 +137,67 @@ class _WorkoutPageState extends State<WorkoutPage> {
     return Consumer<WorkoutData>(
       builder:
           (context, data, child) => Scaffold(
-            appBar: AppBar(title: Text(widget.workoutName)),
+            appBar: AppBar(
+              title: Text(
+                widget.workoutName,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              backgroundColor: Colors.grey[800],
+              elevation: 0,
+            ),
             floatingActionButton: FloatingActionButton(
               onPressed: openNewExerciseDialog,
               child: const Icon(Icons.add),
             ),
-            body: ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: data.numberOfExercisesInWorkout(widget.workoutName),
-              itemBuilder: (context, index) {
-                final exercise =
-                    data
-                        .getRelevantWorkout(widget.workoutName)
-                        .exercises[index];
-                return Dismissible(
-                  key: ValueKey('${widget.workoutName}-$index'),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: const Icon(Icons.delete, color: Colors.white),
-                  ),
-                  onDismissed: (_) {
-                    data.deleteExercise(widget.workoutName, exercise.name);
-                  },
-                  child: GestureDetector(
-                    onLongPress: () => showEditExerciseDialog(exercise.name),
-                    child: ExerciseTile(
-                      exerciseName: exercise.name,
-                      weight: exercise.weight,
-                      reps: exercise.reps,
-                      sets: exercise.sets,
-                      isCompleted: exercise.isCompleted,
-                      onCheckBoxChanged: (_) => toggleExercise(exercise.name),
+            body: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color.fromARGB(255, 150, 150, 150),
+                    Color.fromARGB(255, 81, 81, 81),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              child: ListView.builder(
+                padding: const EdgeInsets.all(8),
+                itemCount: data.numberOfExercisesInWorkout(widget.workoutName),
+                itemBuilder: (context, index) {
+                  final exercise =
+                      data
+                          .getRelevantWorkout(widget.workoutName)
+                          .exercises[index];
+                  return Dismissible(
+                    key: ValueKey('${widget.workoutName}-$index'),
+                    direction: DismissDirection.endToStart,
+                    background: Container(
+                      color: Colors.red,
+                      alignment: Alignment.centerRight,
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: const Icon(Icons.delete, color: Colors.white),
                     ),
-                  ),
-                );
-              },
+                    onDismissed: (_) {
+                      data.deleteExercise(widget.workoutName, exercise.name);
+                    },
+                    child: GestureDetector(
+                      onLongPress: () => showEditExerciseDialog(exercise.name),
+                      child: ExerciseTile(
+                        exerciseName: exercise.name,
+                        weight: exercise.weight,
+                        reps: exercise.reps,
+                        sets: exercise.sets,
+                        isCompleted: exercise.isCompleted,
+                        onCheckBoxChanged: (_) => toggleExercise(exercise.name),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
     );
